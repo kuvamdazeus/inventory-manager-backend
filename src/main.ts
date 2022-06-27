@@ -209,21 +209,25 @@ app.post("/forgot-password", async (req, res) => {
     process.env.JWT_SECRET as string
   )}`;
 
-  const transport = nodemailer.createTransport({
-    host: "smtp-relay.sendinblue.com",
-    port: 587,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+  try {
+    const transport = nodemailer.createTransport({
+      host: "smtp-relay.sendinblue.com",
+      port: 587,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
-  await transport.sendMail({
-    from: "Inventory Manager <kuvambhardwaj0529@gmail.com>",
-    to: dbUser.email,
-    subject: "A Reset Password Request Was Recieved For Your Account",
-    html: `<h2>Click on this link to reset your password:</h2><br><br><a href='${verificationUrl}'>${verificationUrl}</a>`,
-  });
+    await transport.sendMail({
+      from: "Inventory Manager <kuvambhardwaj0529@gmail.com>",
+      to: dbUser.email,
+      subject: "A Reset Password Request Was Recieved For Your Account",
+      html: `<h2>Click on this link to reset your password:</h2><br><br><a href='${verificationUrl}'>${verificationUrl}</a>`,
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "well, thats sad! Error in sending email" });
+  }
 
   return res.status(201).json({ message: "link sent to email" });
 });

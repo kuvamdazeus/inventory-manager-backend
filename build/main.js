@@ -172,20 +172,25 @@ app.post("/forgot-password", async (req, res) => {
         return res.status(404).json({ message: "user not found with that email" });
     }
     const verificationUrl = `${process.env.FE_BASE_URL}/verify?token=${jsonwebtoken_1.default.sign({ _id: dbUser._id }, process.env.JWT_SECRET)}`;
-    const transport = nodemailer_1.default.createTransport({
-        host: "smtp-relay.sendinblue.com",
-        port: 587,
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-    });
-    await transport.sendMail({
-        from: "Inventory Manager <kuvambhardwaj0529@gmail.com>",
-        to: dbUser.email,
-        subject: "A Reset Password Request Was Recieved For Your Account",
-        html: `<h2>Click on this link to reset your password:</h2><br><br><a href='${verificationUrl}'>${verificationUrl}</a>`,
-    });
+    try {
+        const transport = nodemailer_1.default.createTransport({
+            host: "smtp-relay.sendinblue.com",
+            port: 587,
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+        await transport.sendMail({
+            from: "Inventory Manager <kuvambhardwaj0529@gmail.com>",
+            to: dbUser.email,
+            subject: "A Reset Password Request Was Recieved For Your Account",
+            html: `<h2>Click on this link to reset your password:</h2><br><br><a href='${verificationUrl}'>${verificationUrl}</a>`,
+        });
+    }
+    catch (err) {
+        return res.status(500).json({ message: "well, thats sad! Error in sending email" });
+    }
     return res.status(201).json({ message: "link sent to email" });
 });
 app.get("/verify-link", (req, res) => {
